@@ -2,26 +2,28 @@ const db = require('../../dbConfig')
 
 module.exports = {
   getTasks,
-  getResourceByID,
-  addResource
+  getTaskByID,
+  addTask
 }
 
 
 function getTasks(){
-  return db('tasks')
+  return db('tasks as t')
+          .join('projects as p', 'p.id', 't.project_id')
+          .select('t.id', 't.description as task_description', 't.notes as task_notes', 't.completed as task_completed', 'p.name as project_name', 'p.description as project_description')
 }
 
-function getResourceByID(id){
+function getTaskByID(id){
   return db('tasks')
           .where({ id })
 }
 
-function addResource(resource){
+function addTask(task){
   return (
     db('tasks')
-      .insert(resource, 'id')
+      .insert(task, 'id')
       .then(id => {
-        return getResourceByID(id)
+        return getTaskByID(id)
       })
   )
 }
