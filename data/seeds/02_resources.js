@@ -1,6 +1,6 @@
 
 exports.seed = function(knex) {
-  return knex('resources').del()
+  return knex('resources').truncate()
     .then(function () {
       return knex('resources').insert([
         {name: 'resource1', description: 'software license'},
