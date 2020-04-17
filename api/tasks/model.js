@@ -16,13 +16,14 @@ function getTasks(){
 function getTaskByID(id){
   return db('tasks')
           .where({ id })
+          .first()
 }
 
 function addTask(task){
   return (
     db('tasks')
       .insert(task, 'id')
-      .then(id => {
+      .then(([id]) => {
         return getTaskByID(id)
       })
   )

@@ -20,7 +20,7 @@ function addResource(resource){
   return (
     db('resources')
       .insert(resource, 'id')
-      .then(id => {
+      .then(([id]) => {
         return getResourceByID(id)
       })
   )

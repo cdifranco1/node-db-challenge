@@ -13,16 +13,27 @@ router.get('/', (req, res) => {
     })
 })
 
-router.get('/:id', validateProjectID, (req, res) => {
+router.get('/:id', validateProjectID, async (req, res) => {
   const { id } = req.params
+  try {
+    const project = await Projects.getProjectByID(id) 
+    const tasks = await Projects.getProjectTasks(id)
+    const resources = await Projects.getProjectResources(id)
 
-  Projects.getProjectByID(id)
-    .then(project => {
-      res.status(200).json(project)
-    })
-    .catch(err => {
-      res.status(500).json({ error: err.message })
-    })
+    const formatProj = convertBoolean(project)
+    const formatTasks = tasks.map(obj => convertBoolean(obj))
+
+    const newObj = {
+      ...formatProj,
+      tasks: [...formatTasks],
+      resources: [...resources]
+    }
+    
+    res.status(200).json(newObj)
+
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  } 
 })
 
 router.get('/:id/resources', validateProjectID, (req, res) => {
@@ -49,7 +60,7 @@ router.get('/:id/tasks', validateProjectID, (req, res) => {
     })
 })
 
-router.post('/', (req, res) => {
+router.post('/', validateProjectBody, (req, res) => {
   
   Projects.addProject(req.body)
     .then(project => {
@@ -68,6 +79,25 @@ async function validateProjectID(req, res, next){
     res.status(404).json({ message: "Project with specified ID does not exist."})
   } else {
     next()
+  }
+}
+
+function validateProjectBody(req, res, next){
+  if (!req.body){
+    res.status(400).json({ message: 'Please provide project details.'})
+  } else if (!req.body.name){
+    res.status(400).json({ message: 'Please provide project name'})
+  } else {
+    next()
+  }
+}
+
+
+//util function
+function convertBoolean(obj){
+  return {
+    ...obj,
+    completed: !!obj.completed
   }
 }
 
